@@ -1,0 +1,18 @@
+
+int buzzerPin = 9;
+
+void setup()
+{
+  pinMode(buzzerPin, OUTPUT);
+}
+
+
+void loop()
+{
+  
+  // to adjust the sound of the buzzer
+    tone(buzzerPin, 600, 135);  //600 is frequency (control sound)
+    delay(1000); //to wait 1 sec
+    digitalWrite(buzzerPin, HIGH);
+
+}
