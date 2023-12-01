@@ -1,4 +1,4 @@
-//this a code to control a servo motor
+//this is  a code to control a servo motor
 
 #include <Servo.h>
 
