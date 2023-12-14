@@ -1,0 +1,68 @@
+//code for servo and password
+#include <Keypad.h>
+#include <Servo.h>
+
+Servo myservo;
+int pos = 0;
+
+const byte ROWS = 2;
+const byte COLS = 3;
+
+char keys[ROWS][COLS] = {
+    {'1','3','A'},
+    {'4','6','B'}
+};
+
+byte rowPins[ROWS] = {7, 6};
+byte colPins[COLS] = {5, 3, 2};
+
+Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
+
+const String password = "1341";
+String password_entered;
+int password_index = 0;
+//int buzzer_pin = 11;
+void setup()
+{
+    Serial.begin(9600);
+    //pinMode(buzzer_pin, OUTPUT);
+    myservo.attach(9);
+}
+
+void loop()
+{
+    char key = keypad.getKey();
+    if (key)
+    {
+        Serial.println(key);
+        password_entered += key;
+        password_index++;
+
+        // Check for password match
+        if (password_index == 4)
+        {
+            if (password_entered == password)
+            {
+                Serial.println("Password OK!");
+                for(pos = 0; pos <= 180; pos++)
+                  myservo.write(pos);
+                  delay(1);
+            }
+            else
+            {
+                Serial.println("Password Error");
+                //tone(buzzer_pin, 600, 135);
+            }
+
+            // Reset password variables
+            password_entered = "";
+            password_index = 0;
+        }
+        if(key == 'A')
+          {
+            for (pos = 180; pos > 0; pos--)
+              myservo.write(pos);
+          
+            }
+    }
+}
