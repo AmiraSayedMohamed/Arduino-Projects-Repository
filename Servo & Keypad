@@ -62,6 +62,8 @@ void loop()
           {
             for (pos = 180; pos > 0; pos--)
               myservo.write(pos);
+            password_entered = "";
+            password_index = 0;
           
             }
     }
