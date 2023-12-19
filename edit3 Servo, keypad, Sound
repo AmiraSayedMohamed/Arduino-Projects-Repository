@@ -1,0 +1,86 @@
+// edit3 servo , keypad code to add a sound
+#include <Keypad.h>
+#include <Servo.h>
+#include <TMRpcm.h>
+
+#define SD_ChipSelectionPin 4
+TMRpcm aud;
+
+Servo myservo;
+int pos = 0; // Reset position variable inside loop
+
+const byte ROWS = 2;
+const byte COLS = 3;
+
+char keys[ROWS][COLS] = {
+  {'1', '3', 'A'},
+  {'4', '6', 'B'}
+};
+
+byte rowPins[ROWS] = {2, 3};
+byte colPins[COLS] = {5, 6, 7};
+
+Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
+
+const String password = "1341";
+String password_entered;
+int password_index = 0;
+
+void setup() {
+  Serial.begin(9600);
+  myservo.attach(8);
+  aud.speakerPin = 9;
+  if (!SD.begin(SD_ChipSelectionPin)) {
+    Serial.println("SD failed ...");
+    return;
+  }
+  aud.setVolume(5);
+  aud.quality(1);
+}
+
+void loop() {
+  char key = keypad.getKey();
+  if (key) {
+    Serial.println(key);
+    switch (key) {
+      case '1': aud.play("1.wav"); break;
+      case '3': aud.play("3.wav"); break;
+      case '4': aud.play("4.wav"); break;
+      default: break;
+    }
+    password_entered += key;
+    password_index++;
+
+    // Check for password match
+    if (password_index == 4) {
+      if (password_entered == password) {
+        Serial.println("Password OK!");
+        for (pos = 0; pos <= 180; pos++) {
+          myservo.write(pos); // Move servo
+          delay(1); // Optional delay for smoother movement
+        }
+        aud.play("c.wav");
+        // Reset servo and password data
+        //myservo.write(0); // Set servo back to initial position
+        password_entered = "";
+        password_index = 0;
+      } else {
+        Serial.println("Password Error");
+        aud.play("ic.wav");
+        // Reset password data
+        password_entered = "";
+        password_index = 0;
+      }
+    }
+
+    if (key == 'A') {
+      for (pos = 180; pos > 0; pos--) {
+        myservo.write(pos); // Move servo
+        delay(1); // Optional delay for smoother movement
+      }
+      password_entered = "";
+      password_index = 0;
+      //myservo.write(0); // Set servo back to initial position
+    }
+  }
+}
