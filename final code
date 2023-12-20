@@ -1,0 +1,91 @@
+// edit3 servo , keypad code to add a sound
+// (750, 0 degree) , (1500, 90 degree), (2250, 180 degree)
+#include <Keypad.h>
+#include"ServoTimer2.h" 
+#include <TMRpcm.h>
+
+#define SD_ChipSelectionPin 4
+TMRpcm aud;
+
+ServoTimer2 servo1;
+//int pos = 0; // Reset position variable inside loop
+
+const byte ROWS = 2;
+const byte COLS = 3;
+
+char keys[ROWS][COLS] = {
+  {'1', '3', 'A'},
+  {'4', '6', 'B'}
+};
+
+byte rowPins[ROWS] = {7, 6};
+byte colPins[COLS] = {5, 3, 2};
+
+Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
+
+const String password = "1341";
+String password_entered;
+int password_index = 0;
+
+void setup() {
+  Serial.begin(9600);
+  servo1.attach(8);
+  aud.speakerPin = 9;
+  if (!SD.begin(SD_ChipSelectionPin)) {
+    Serial.println("SD failed ...");
+    return;
+  }
+  aud.setVolume(5);
+  aud.quality(1);
+}
+
+void loop() {
+  char key = keypad.getKey();
+  if (key) {
+    Serial.println(key);
+    switch (key) {
+      case '1': aud.play("1.wav"); break;
+      case '3': aud.play("3.wav"); break;
+      case '4': aud.play("4.wav"); break;
+      default: break;
+    }
+    password_entered += key;
+    password_index++;
+
+    // Check for password match
+    if (password_index == 4) {
+      if (password_entered == password) {
+        Serial.println("Password OK!");
+        servo1.write(2250);
+        aud.play("c.wav");
+        // Reset servo and password data
+        //myservo.write(0); // Set servo back to initial position
+        password_entered = "";
+        password_index = 0;
+      } else {
+        Serial.println("Password Error");
+        aud.play("ic.wav");
+        // Reset password data
+        password_entered = "";
+        password_index = 0;
+      }
+    }
+
+    if (key == 'A') {
+      servo1.write(750);
+      password_entered = "";
+      password_index = 0;
+      //myservo.write(0); // Set servo back to initial position
+    }
+  }
+}
+
+
+/* this is my final code i have a problem with my library Servo.h and my Library TMRpcm.h they both are using the same timer (timer 1 ) 
+i have to find a library for servo to  work in a  timer2 this article helped me :
+https://projecthub.arduino.cc/ashraf_minhaj/how-to-use-servotimer2-library-simple-explain-servo-sweep-9bbe4e
+and here it's his video on youtube:
+https://youtu.be/UZhVfkpcBOQ?si=rQRDuxlkr7vT5w55
+
+and then the code work correctly as i want 
+*/
